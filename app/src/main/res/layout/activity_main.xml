@@ -28,7 +28,8 @@
         android:paddingLeft="3dp"
         android:paddingRight="3dp"
         android:tag="btnOp"
-        android:text="TextView"
+        android:text="0"
+        android:textColor="#202020"
         android:textSize="30sp"
         android:textStyle="bold" />
 
@@ -56,6 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:onClick="onBtnClearClicked"
                 android:text="C" />
 
             <Button
@@ -86,6 +88,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:onClick="onBtnNumClicked"
+                android:tag="btnDot"
                 android:text="." />
         </LinearLayout>
 
@@ -100,6 +104,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:onClick="onBtnDeleteClicked"
                 android:text="&lt;-" />
 
             <Button
@@ -176,6 +181,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:onClick="onBtnEqualClicked"
                 android:text="=" />
         </LinearLayout>
 
