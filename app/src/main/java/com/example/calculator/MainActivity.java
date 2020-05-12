@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -25,6 +26,10 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isFirst;
     private boolean isLastNum;
+    private boolean isLastOpenParen;
+
+    private int openParenCount;
+
     private Queue<UnitObject> unitQ;
 
     @Override
@@ -37,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
         isFirst = true;
         isLastNum = false;
+        isLastOpenParen = false;
+        openParenCount = 0;
         unitQ = new LinkedList<>();
 
         RecyclerView recBtn = findViewById(R.id.recBtn);
@@ -56,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     public void onBtnNumClicked(View view)
     {
         Button btnNum = view.findViewWithTag("btnNum");
-        isLastNum = true;
 
         if(isFirst)
         {
@@ -70,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
             txtExpress.append(btnNum.getText());
         else
             txtExpress.append(".");
+
+        isLastNum = true;
+        isLastOpenParen = false;
     }
 
     public void onBtnOpClicked(View view)
@@ -82,11 +91,14 @@ public class MainActivity extends AppCompatActivity {
         txtExpress.append(btnOp.getText());
 
         isLastNum = false;
+        isLastOpenParen = false;
     }
 
     public void onBtnEqualClicked(View view)
     {
         String strExpress = txtExpress.getText().toString();
+
+        strExpress = getModExpress(strExpress);
 
         for(int i=0; i<strExpress.length(); i++)
         {
@@ -138,7 +150,48 @@ public class MainActivity extends AppCompatActivity {
         unitQ.clear();
     }
 
-    
+    public void onBtnParenClicked(View view)
+    {
+        if(isFirst)
+        {
+            txtExpress.setText("");
+
+            isFirst = false;
+        }
+
+        if(!isLastNum)
+        {
+            txtExpress.append("(");
+
+            isLastOpenParen = true;
+            openParenCount++;
+        }
+        else
+        {
+            if(openParenCount==0)
+            {
+                txtExpress.append("*(");
+
+                isLastOpenParen = true;
+                openParenCount++;
+            }
+            else if(isLastOpenParen)
+            {
+                txtExpress.append("(");
+
+                isLastOpenParen = true;
+                openParenCount++;
+            }
+            else
+            {
+                txtExpress.append(")");
+
+                isLastOpenParen = false;
+                openParenCount--;
+            }
+        }
+    }
+
     private Queue<UnitObject> makeToPost(Queue<UnitObject> normalQ)
     {
         Queue<UnitObject> postQ = new LinkedList<>();
@@ -154,18 +207,32 @@ public class MainActivity extends AppCompatActivity {
             {
                 OpObject currentOp = (OpObject)unit;
 
-                while(!opStack.isEmpty() && opStack.peek().getPriority() < currentOp.getPriority())
+                if(currentOp.getOp() == ')')
                 {
-                    postQ.add(opStack.pop());
-                }
+                    while(opStack.peek().getOp()!='(')
+                    {
+                        postQ.add(opStack.pop());
+                    }
 
+                    opStack.pop();
+                }
+                else
+                {
+                    while (!opStack.isEmpty() && opStack.peek().getPriority() <= currentOp.getPriority())
+                    {
+                        postQ.add(opStack.pop());
+                    }
+                }
                 opStack.add(currentOp);
             }
         }
 
         while(!opStack.isEmpty())
         {
-            postQ.add(opStack.pop());
+            if(opStack.peek().getOp()=='(')
+                opStack.pop();
+            else
+                postQ.add(opStack.pop());
         }
 
         return postQ;
@@ -200,6 +267,16 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
+    private String getModExpress(String express)
+    {
+        for(int i=express.length()-1; i>=0; i--)
+        {
+            if(isNumber(""+express.charAt(i)))
+                return express.substring(0,i+1);
+        }
+
+        return "";
+    }
     private double doCalculate(double num1, double num2, char op)
     {
         double result;
@@ -218,15 +295,19 @@ public class MainActivity extends AppCompatActivity {
     }
     private void deleteOne()
     {
-        txtExpress.setText(txtExpress.getText().subSequence(0,txtExpress.length()-1));
+        String getStr = txtExpress.getText().toString();
 
-        String changedStr = txtExpress.getText().toString();
-        int changedLen = changedStr.length();
+        if(!getStr.equals("")) {
+            txtExpress.setText(getStr.subSequence(0, txtExpress.length() - 1));
 
-        if(isNumber(""+changedStr.charAt(changedLen-1)))
-            isLastNum = true;
-        else
-            isLastNum = false;
+            String changedStr = getStr.toString();
+            int changedLen = changedStr.length();
+
+            if (isNumber("" + changedStr.charAt(changedLen - 1)))
+                isLastNum = true;
+            else
+                isLastNum = false;
+        }
     }
 
     private boolean isNumber(String str)
