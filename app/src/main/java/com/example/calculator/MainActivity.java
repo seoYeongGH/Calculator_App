@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBtnClearClicked(View view)
     {
         txtExpress.setText("0");
+        txtResult.setText("0.0");
         isFirst = true;
         unitQ.clear();
     }
@@ -209,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if(currentOp.getOp() == ')')
                 {
-                    while(opStack.peek().getOp()!='(')
+                    while(!opStack.isEmpty() && opStack.peek().getOp()!='(')
                     {
                         postQ.add(opStack.pop());
                     }
@@ -222,8 +223,9 @@ public class MainActivity extends AppCompatActivity {
                     {
                         postQ.add(opStack.pop());
                     }
+
+                    opStack.add(currentOp);
                 }
-                opStack.add(currentOp);
             }
         }
 
@@ -277,6 +279,7 @@ public class MainActivity extends AppCompatActivity {
 
         return "";
     }
+
     private double doCalculate(double num1, double num2, char op)
     {
         double result;
@@ -298,12 +301,18 @@ public class MainActivity extends AppCompatActivity {
         String getStr = txtExpress.getText().toString();
 
         if(!getStr.equals("")) {
+            int originLen = getStr.length();
+
+            if(getStr.charAt(originLen-1) == '(')
+                openParenCount--;
+            else if(getStr.charAt(originLen-1) == ')')
+                openParenCount++;
+
             txtExpress.setText(getStr.subSequence(0, txtExpress.length() - 1));
 
-            String changedStr = getStr.toString();
-            int changedLen = changedStr.length();
+            String changedStr = getStr;
 
-            if (isNumber("" + changedStr.charAt(changedLen - 1)))
+            if (originLen>1 && isNumber("" + changedStr.charAt(originLen - 2)))
                 isLastNum = true;
             else
                 isLastNum = false;

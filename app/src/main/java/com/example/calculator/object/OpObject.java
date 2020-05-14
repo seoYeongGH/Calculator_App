@@ -35,7 +35,7 @@ public class OpObject extends UnitObject {
             case '*':
             case '/':
             case '%': return 1;
-            case '(': return 0;
+            case '(': return 3;
             default: return -1;
         }
     }
